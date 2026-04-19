@@ -37,3 +37,14 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Secrets and Config ###
+application.properties
+client.properties
+*.properties
+!src/main/resources/*.properties
+# Aslında tüm propertiesleri gizlemek yerine sadece şifre içerenleri gizlemek daha iyi
+# Ama kullanıcı application.properties'i gizle dediği için:
+**/application.properties
+**/client.properties
+secrets.txt
