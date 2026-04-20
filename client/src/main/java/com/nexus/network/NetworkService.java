@@ -2,7 +2,7 @@ package com.nexus.network;
 
 public class NetworkService {
     // Senin sunucu adresin
-    private static final String SERVER_DOMAIN = "pts.seedhr.com.tr";
+    private static final String SERVER_DOMAIN = "localhost";
     private static final String SERVER_PORT = "8088";
 
     // WebSocket bağlantı URL'i
