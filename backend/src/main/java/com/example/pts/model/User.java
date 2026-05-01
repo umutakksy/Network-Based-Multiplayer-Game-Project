@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +15,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class User {
     @Id
     private String id;
+    
+    @NotBlank(message = "Kullanıcı adı boş olamaz")
     private String username;
-    private String password; // Not: Gerçek projede şifrelenmiş olmalı
+    
+    @NotBlank(message = "Şifre boş olamaz")
+    @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
+    private String password;
+    
     private int score;
 }

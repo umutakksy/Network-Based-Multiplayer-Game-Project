@@ -43,7 +43,7 @@ public class NetworkManager {
     }
 
     public void joinLobby(String lobbyId, String username, String password) throws Exception {
-        backendClient.joinLobby(lobbyId, username, password);
+        backendClient.joinLobby(lobbyId, password);
         this.currentLobbyId = lobbyId;
         startPolling();
     }
@@ -52,7 +52,7 @@ public class NetworkManager {
         if (currentLobbyId != null) {
             try {
                 stopPolling();
-                backendClient.leaveLobby(currentLobbyId, username);
+                backendClient.leaveLobby(currentLobbyId);
                 currentLobbyId = null;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -105,7 +105,7 @@ public class NetworkManager {
     public void sendChatMessage(String nickname, String message) {
         if (currentLobbyId != null) {
             try {
-                backendClient.sendChat(currentLobbyId, nickname, message);
+                backendClient.sendChat(currentLobbyId, message);
             } catch (Exception e) {
                 e.printStackTrace();
             }

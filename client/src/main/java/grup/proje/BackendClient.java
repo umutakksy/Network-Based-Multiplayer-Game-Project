@@ -80,19 +80,19 @@ public class BackendClient {
         return mapper.readValue(response, new TypeReference<>() {});
     }
 
-    public void joinLobby(String lobbyId, String username, String password) throws Exception {
-        addAuthHeader(Request.post(BASE_URL + "/lobbies/join/" + lobbyId + "?username=" + username + "&password="
+    public void joinLobby(String lobbyId, String password) throws Exception {
+        addAuthHeader(Request.post(BASE_URL + "/lobbies/join/" + lobbyId + "?password="
                 + (password == null ? "" : password)))
                 .execute();
     }
 
-    public void leaveLobby(String lobbyId, String username) throws Exception {
-        addAuthHeader(Request.post(BASE_URL + "/lobbies/leave/" + lobbyId + "?username=" + username))
+    public void leaveLobby(String lobbyId) throws Exception {
+        addAuthHeader(Request.post(BASE_URL + "/lobbies/leave/" + lobbyId))
                 .execute();
     }
 
-    public void sendChat(String lobbyId, String sender, String message) throws Exception {
-        addAuthHeader(Request.post(BASE_URL + "/lobbies/" + lobbyId + "/chat?sender=" + sender + "&message=" + message))
+    public void sendChat(String lobbyId, String message) throws Exception {
+        addAuthHeader(Request.post(BASE_URL + "/lobbies/" + lobbyId + "/chat?message=" + message))
                 .execute();
     }
 

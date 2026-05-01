@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -16,7 +17,8 @@ public class LobbyController {
     private LobbyService lobbyService;
 
     @PostMapping("/create")
-    public ResponseEntity<Lobby> createLobby(@RequestBody Lobby lobby) {
+    public ResponseEntity<Lobby> createLobby(@RequestBody Lobby lobby, Principal principal) {
+        lobby.setCreatorId(principal.getName());
         return ResponseEntity.ok(lobbyService.createLobby(lobby));
     }
 
@@ -36,8 +38,9 @@ public class LobbyController {
     public ResponseEntity<String> joinLobby(
             @PathVariable String lobbyId, 
             @RequestParam(required = false) String password, 
-            @RequestParam String username) {
+            Principal principal) {
         
+        String username = principal.getName();
         String result = lobbyService.joinLobby(lobbyId, password, username);
         if ("SUCCESS".equals(result)) {
             return ResponseEntity.ok("Lobiye giriş yapıldı");
@@ -48,14 +51,16 @@ public class LobbyController {
     @PostMapping("/{lobbyId}/chat")
     public ResponseEntity<Void> sendChat(
             @PathVariable String lobbyId,
-            @RequestParam String sender,
-            @RequestParam String message) {
+            @RequestParam String message,
+            Principal principal) {
+        String sender = principal.getName();
         lobbyService.sendChatMessage(lobbyId, sender, message);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/leave/{lobbyId}")
-    public ResponseEntity<String> leaveLobby(@PathVariable String lobbyId, @RequestParam String username) {
+    public ResponseEntity<String> leaveLobby(@PathVariable String lobbyId, Principal principal) {
+        String username = principal.getName();
         lobbyService.leaveLobby(lobbyId, username);
         return ResponseEntity.ok("Lobiden ayrılındı");
     }
