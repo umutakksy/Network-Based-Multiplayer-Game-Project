@@ -27,8 +27,12 @@ public class LobbyService {
         if (lobby.getMemberUsernames() == null) {
             lobby.setMemberUsernames(new java.util.ArrayList<>());
         }
+        if (lobby.getPlayerReadyStatus() == null) {
+            lobby.setPlayerReadyStatus(new java.util.HashMap<>());
+        }
         if (lobby.getCreatorId() != null && !lobby.getMemberUsernames().contains(lobby.getCreatorId())) {
             lobby.getMemberUsernames().add(lobby.getCreatorId());
+            lobby.getPlayerReadyStatus().put(lobby.getCreatorId(), false);
         }
         Lobby savedLobby = lobbyRepository.save(lobby);
         broadcastLobbyList();
@@ -54,6 +58,10 @@ public class LobbyService {
 
         if (!lobby.getMemberUsernames().contains(username)) {
             lobby.getMemberUsernames().add(username);
+            if (lobby.getPlayerReadyStatus() == null) {
+                lobby.setPlayerReadyStatus(new java.util.HashMap<>());
+            }
+            lobby.getPlayerReadyStatus().put(username, false);
             lobbyRepository.save(lobby);
             notifyLobbyChange(lobbyId);
             broadcastLobbyList();
@@ -73,6 +81,9 @@ public class LobbyService {
                 lobbyRepository.delete(lobby);
             } else {
                 lobby.getMemberUsernames().remove(username);
+                if (lobby.getPlayerReadyStatus() != null) {
+                    lobby.getPlayerReadyStatus().remove(username);
+                }
                 if (lobby.getMemberUsernames().isEmpty()) {
                     lobbyRepository.delete(lobby);
                 } else {
@@ -102,5 +113,58 @@ public class LobbyService {
 
     private void broadcastLobbyList() {
         messagingTemplate.convertAndSend("/topic/lobbies", lobbyRepository.findAll());
+    }
+
+    public void setPlayerReady(String lobbyId, String username, boolean isReady) {
+        Optional<Lobby> optionalLobby = lobbyRepository.findById(lobbyId);
+        if (optionalLobby.isPresent()) {
+            Lobby lobby = optionalLobby.get();
+            if (lobby.getPlayerReadyStatus() == null) {
+                lobby.setPlayerReadyStatus(new java.util.HashMap<>());
+            }
+            lobby.getPlayerReadyStatus().put(username, isReady);
+            lobbyRepository.save(lobby);
+            notifyLobbyChange(lobbyId);
+        }
+    }
+
+    public boolean canStartGame(String lobbyId) {
+        Optional<Lobby> optionalLobby = lobbyRepository.findById(lobbyId);
+        if (optionalLobby.isEmpty()) {
+            return false;
+        }
+        
+        Lobby lobby = optionalLobby.get();
+        if (lobby.getMemberUsernames().isEmpty() || lobby.getPlayerReadyStatus() == null || lobby.getPlayerReadyStatus().isEmpty()) {
+            return false;
+        }
+
+        // Tüm üyelerin hazır olup olmadığını kontrol et
+        for (String member : lobby.getMemberUsernames()) {
+            Boolean isReady = lobby.getPlayerReadyStatus().get(member);
+            if (isReady == null || !isReady) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean startGame(String lobbyId) {
+        if (!canStartGame(lobbyId)) {
+            return false;
+        }
+
+        Optional<Lobby> optionalLobby = lobbyRepository.findById(lobbyId);
+        if (optionalLobby.isPresent()) {
+            Lobby lobby = optionalLobby.get();
+            lobby.setStarted(true);
+            lobbyRepository.save(lobby);
+            notifyLobbyChange(lobbyId);
+            messagingTemplate.convertAndSend("/topic/lobby/" + lobbyId + "/start", "GAME_STARTED");
+            return true;
+        }
+
+        return false;
     }
 }

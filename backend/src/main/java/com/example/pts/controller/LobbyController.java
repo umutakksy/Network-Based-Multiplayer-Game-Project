@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/lobbies")
@@ -63,5 +64,37 @@ public class LobbyController {
         String username = principal.getName();
         lobbyService.leaveLobby(lobbyId, username);
         return ResponseEntity.ok("Lobiden ayrılındı");
+    }
+
+    @PostMapping("/{lobbyId}/ready")
+    public ResponseEntity<String> setPlayerReady(
+            @PathVariable String lobbyId,
+            @RequestParam boolean isReady,
+            Principal principal) {
+        String username = principal.getName();
+        lobbyService.setPlayerReady(lobbyId, username, isReady);
+        return ResponseEntity.ok(isReady ? "Hazır duruma geçtiniz" : "Hazır olmayan duruma geçtiniz");
+    }
+
+    @PostMapping("/{lobbyId}/start")
+    public ResponseEntity<String> startGame(@PathVariable String lobbyId, Principal principal) {
+        Optional<Lobby> lobbyOpt = lobbyService.getLobby(lobbyId);
+        
+        if (lobbyOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Lobi bulunamadı");
+        }
+
+        Lobby lobby = lobbyOpt.get();
+        
+        // Sadece lobi kurucusu oyunu başlatabilir
+        if (!lobby.getCreatorId().equals(principal.getName())) {
+            return ResponseEntity.badRequest().body("Sadece lobi kurucusu oyunu başlatabilir");
+        }
+
+        if (lobbyService.startGame(lobbyId)) {
+            return ResponseEntity.ok("Oyun başlatıldı");
+        } else {
+            return ResponseEntity.badRequest().body("Tüm oyuncuların hazır olması gerekir");
+        }
     }
 }

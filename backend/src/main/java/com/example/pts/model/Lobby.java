@@ -7,7 +7,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -23,4 +25,5 @@ public class Lobby {
     private boolean isStarted = false;
     private int maxPlayers = 4;
     private List<String> chatHistory = new ArrayList<>();
+    private Map<String, Boolean> playerReadyStatus = new HashMap<>();
 }
