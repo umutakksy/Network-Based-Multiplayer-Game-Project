@@ -112,7 +112,7 @@ public class LobbyBrowserUI {
                     nameLabel.setMinWidth(250);
                     nameLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
 
-                    Label countLabel = new Label(item.playerCount + "/3");
+                    Label countLabel = new Label(item.playerCount);
                     countLabel.setMinWidth(100);
 
                     Label statusLabel = new Label(item.status); // "Lobide", "Savaşta", "Dolu"
